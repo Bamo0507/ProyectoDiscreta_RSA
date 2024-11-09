@@ -16,43 +16,6 @@ def criba_eratostenes(limite):
     # Devuelve una lista de números primos hasta el límite especificado
     return [p for p, primo in enumerate(es_primo) if primo]
 
-# Función para generar números primos en un rango dado utilizando la Criba y el método de división de prueba
-def generar_primo(rango_inferior, rango_superior):
-    
-    lista_Primos = []  # Se inicializa la lista para almacenar los números primos encontrados
-    
-    # Aseguramos que el rango inferior sea al menos 2, ya que 1 no es primo
-    if rango_inferior < 2:
-        rango_inferior = 2
-
-    # Iteramos sobre cada número en el rango definido por el usuario
-    for n in range(rango_inferior, rango_superior):
-        
-        # Calculamos el límite superior de divisores necesarios (la raíz cuadrada de n)
-        limite = int(math.sqrt(n))
-        
-        # Obtenemos todos los números primos menores o iguales a la raíz cuadrada de n
-        primos_menores = criba_eratostenes(limite)
-        
-        es_primo = True  # Variable para marcar si el número es primo (True) o no primo (False)
-
-        # Itera solo sobre los primos hasta la raíz cuadrada de n
-        for primo in primos_menores:
-            if n % primo == 0:  # Si n es divisible por algún primo, entonces no es primo
-                es_primo = False  # Marca que el número no es primo
-                break  
-
-        # Si después del bucle `for` es_primo sigue en True, significa que n es primo
-        if es_primo:
-            lista_Primos.append(n)  
-            print(f"Primo: {n}")  
-    
-    # Manejo del caso en que no se encuentran números primos en el rango
-    if not lista_Primos:
-        print("No se encontraron números primos en el rango especificado, porfavor amplie el rango de busqueda.")
-        return None  
-    
-    return lista_Primos  
 
 # Nueva función para calcular el inverso modular usando el algoritmo extendido de Euclides
 def inverso_modular(e, n):
