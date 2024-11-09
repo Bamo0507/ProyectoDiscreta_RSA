@@ -225,3 +225,124 @@ def desencriptar(caracter_encriptado, llave_privada):
         return None
 #---------------------------------------------------------------------------------------------------------
 
+
+#--------------------------Pruebas-------------------------------------------------------------------------------
+
+def pruebas():
+    """
+    Función para realizar pruebas específicas del sistema RSA con valores predefinidos.
+    """
+    # Definición de la clave pública y privada, y los mensajes de prueba
+    clave_publica = (15131, 31877)
+    clave_privada = (31271, 31877)
+    
+    mensajes_prueba = [
+        {"original": 42, "encriptado_esperado": 3422},
+        {"original": 15, "encriptado_esperado": 17062},
+        {"original": 67, "encriptado_esperado": 25058}
+    ]
+    
+    print("Pruebas del Sistema de Encriptación RSA\n")
+    print(f"Clave Pública: {clave_publica}")
+    print(f"Clave Privada: {clave_privada}\n")
+
+    # Realización de pruebas para cada mensaje
+    for i, prueba in enumerate(mensajes_prueba):
+        mensaje_original = prueba["original"]
+        mensaje_encriptado_esperado = prueba["encriptado_esperado"]
+        
+        print(f"\nPrueba {i + 1}")
+        print(f"Mensaje original: {mensaje_original}")
+
+        # Encriptación del mensaje original
+        mensaje_encriptado = encriptar(mensaje_original, clave_publica)
+        print(f"Mensaje encriptado: {mensaje_encriptado}")
+        
+        # Comparación con el mensaje encriptado esperado
+        if mensaje_encriptado == mensaje_encriptado_esperado:
+            print("La encriptación coincide con el valor esperado.")
+        else:
+            print("La encriptación no coincide con el valor esperado.")
+
+        # Desencriptación del mensaje encriptado
+        mensaje_desencriptado = desencriptar(mensaje_encriptado, clave_privada)
+        print(f"Mensaje desencriptado: {mensaje_desencriptado}")
+        
+        # Verificación de que el mensaje desencriptado coincide con el original
+        if mensaje_desencriptado == mensaje_original:
+            print("La desencriptación fue exitosa y coincide con el mensaje original.")
+        else:
+            print("La desencriptación no coincide con el mensaje original.")
+
+# Ejecución de las pruebas
+
+#--------------------------Main-------------------------------------------------------------------------------
+
+def main():
+    """
+    Función principal que ejecuta el flujo completo del sistema RSA con entrada desde la terminal:
+    1. Solicita al usuario el rango para generar números primos.
+    2. Genera claves públicas y privadas.
+    3. Solicita al usuario ingresar mensajes a encriptar y desencriptar.
+    """
+    
+    print("Sistema de Encriptación RSA")
+    
+    # Solicitar rango para generación de números primos
+    try:
+        rango_inferior = int(input("Ingrese el rango inferior para generar números primos: "))
+        rango_superior = int(input("Ingrese el rango superior para generar números primos: "))
+    except ValueError:
+        print("Error: Debe ingresar un número entero válido para el rango.")
+        return
+
+    print("\nGenerando claves RSA...")
+    clave_publica, clave_privada = generar_llaves(rango_inferior, rango_superior)
+    
+    # Comprobación de generación de claves
+    if clave_publica is None or clave_privada is None:
+        print("Error al generar claves RSA. Saliendo del programa.")
+        return
+    
+    
+    # Solicitar mensajes para encriptar
+    mensajes = []
+    while True:
+        try:
+            mensaje = int(input("\nIngrese un número entero positivo para encriptar (o -1 para finalizar): "))
+            if mensaje == -1:
+                break
+            if mensaje > 0:
+                mensajes.append(mensaje)
+            else:
+                print("El número debe ser positivo.")
+        except ValueError:
+            print("Error: Debe ingresar un número entero.")
+    
+    # Encriptación y desencriptación de cada mensaje
+    for i, mensaje in enumerate(mensajes):
+        print(f"\nPrueba {i+1} - Mensaje original: {mensaje}")
+        
+        # Encriptación
+        mensaje_encriptado = encriptar(mensaje, clave_publica)
+        if mensaje_encriptado is None:
+            print("Error al encriptar el mensaje.")
+            continue
+        
+        print(f"Mensaje encriptado: {mensaje_encriptado}")
+        
+        # Desencriptación
+        mensaje_desencriptado = desencriptar(mensaje_encriptado, clave_privada)
+        if mensaje_desencriptado is None:
+            print("Error al desencriptar el mensaje.")
+            continue
+        
+        print(f"Mensaje desencriptado: {mensaje_desencriptado}")
+        
+        # Verificación
+        if mensaje == mensaje_desencriptado:
+            print("La desencriptación fue exitosa y coincide con el mensaje original.")
+        else:
+            print("La desencriptación no coincide con el mensaje original.")
+
+main()
