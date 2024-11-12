@@ -4,7 +4,7 @@ Sistema de Encriptación RSA
 
 - Bryan Alberto Martínez Orellana 23542
 - Adriana Sophia Contreras Palacios 23044
-- Javier Andrés Benítez García 23405
+- Javier André Benítez García 23405
 """
 
 import math
@@ -48,13 +48,15 @@ def generar_primo(rango_inferior, rango_superior):
         print("No se encontraron números primos en el rango especificado, porfavor amplie el rango de busqueda.")
         return None  
     
-    return lista_Primos  
+    numb_primo = random.choice(lista_Primos)
+    
+    return numb_primo  
 
 # Función para encontrar el máximo común divisor entre dos números 'a' y 'b' utilizando el algoritmo euclidiano
 def mcd(a, b):
     try:
         #Verificación de que es un número entero positivo
-        if not isinstance(a, int) and not isinstance(b, int):
+        if not isinstance(a, int) or not isinstance(b, int):
             raise ValueError("Lamentablemente se envío en los parámetros algo que no era un entero.")
         #El bucle continúa hasta que el residuo entre a y b sea 0
         #Esto ya implicaría que hemos sacado el mcd, el cual sería el residuo de la iteración anterior
@@ -78,34 +80,60 @@ def mcd(a, b):
     
 # Función para encontrar el inverso modular entre el exponente público y n
 # En el inverso modular encontramos un número que al multiplicarlo por 'e', sea congruente a 1 mod n
+
 def inverso_modular(e, n):
-    try:
-        # Aqui se verifica que ambos sean enteros positivos
-        if not isinstance(e, int) or not isinstance(n, int):
-            raise ValueError("Error: Ambos parámetros deben ser enteros.")
-        if e <= 0 or n <= 0:
-            raise ValueError("Error: Ambos parámetros deben ser enteros positivos.")
+    # Verificar que ambos sean enteros positivos
+    if not isinstance(e, int) or not isinstance(n, int):
+        raise ValueError("Error: Ambos parámetros deben ser enteros.")
+    if e <= 0 or n <= 0:
+        raise ValueError("Error: Ambos parámetros deben ser enteros positivos.")
 
-        #  residuos y coeficientes necesarios para el cálculo
-        r0, r1 = n, e  # Residuos iniciales
-        s0, s1 = 1, 0  # Coeficientes para calcular el inverso
+    # Inicialización de residuos y coeficientes
+    a = n
+    b = e
+    residuo = -1
+    cociente = 0
+    lista_Cocientes = []
+    lista_residuos = []
+    lista_A = []
+    lista_B = []
 
-        # Algoritmo extendido de Euclides
-        while r1 != 0:
-            q = r0 // r1  # Calcula el cociente de la división
-            r0, r1 = r1, r0 - q * r1  
-            s0, s1 = s1, s0 - q * s1  
+    # Algoritmo extendido de Euclides
+    while residuo != 0:
+        lista_A.append(a)
+        lista_B.append(b)
+        cociente = a // b
+        residuo = a % b
+        lista_Cocientes.append(cociente)
+        lista_residuos.append(residuo)
+        a = b
+        b = residuo
 
-       # si el MCD es igual a 1 significa que si hay inverso modular 
+    # Si el último residuo no es 1, no existe el inverso modular
+    if lista_residuos[-2] != 1:
+        raise ValueError("No existe el inverso modular porque los números no son coprimos.")
 
-        if r0 == 1:
-            return s0 % n  
-        else:
-            return None  # No hay inverso modular si el MCD no es 1
+    # Inicialización de variables que representarán a los coeficientes de Bézout
+    x = 1
+    y = 0
+    x_anterior = 0
+    y_anterior = 1
 
-    except ValueError as e:
-        print(e)
-        return None
+    # Actualización de coeficientes de Bézout usando los cocientes calculados
+    for i in range(len(lista_Cocientes)):
+        x_actual = x
+        x = x_anterior - lista_Cocientes[i] * x
+        x_anterior = x_actual
+
+        y_actual = y
+        y = y_anterior - lista_Cocientes[i] * y
+        y_anterior = y_actual
+
+    # Asegurarse de que x_anterior sea positivo en el rango del módulo
+    inverso = x_anterior % n
+
+    return inverso
+
     
 # Función para generar una lista de números primos usando la Criba de Eratóstenes
 def criba_eratostenes(limite):
@@ -124,33 +152,32 @@ def criba_eratostenes(limite):
 
 
 # Función para generar las llave pública y privada para el algoritmo RSA 
-
 def generar_llaves(rango_inferior, rango_superior):
     # Genera la lista de números primos en el rango especificado
-    primos = generar_primo(rango_inferior, rango_superior)
-    
-    # Si no se encontraron suficientes números primos, se muestra un mensaje de error y se retorna None
-    if primos is None or len(primos) < 2:
-        print("No se encontraron suficientes números primos en el rango especificado.")
-        return None
+    primo1 = generar_primo(rango_inferior, rango_superior)
+    primo2 = primo1
+    while primo2 != primo1:
+        primo2 = generar_primo(rango_inferior, rango_superior)
 
-    # Selecciona dos primos aleatorios diferentes de la lista de primos generados
-    p, q = random.sample(primos, 2)
+    p = primo1
+    q = primo2
+    
     print(f"Valores de p y q seleccionados: p={p}, q={q}")
 
     # Calcula n como el producto de p y q
     n = p * q
     
     # Calcula phi(n) = (p - 1) * (q - 1), que se utiliza en la generación de la clave pública y privada
-    phi = (p - 1) * (q - 1)
+    phi = (p - 1) * (q - 1) #Esto es válido pues al ser dos números primos, el totiente de un número primo, es el número menos 1
 
-    # Inicializa e en 2, que es el valor que se utilizará en la clave pública
+    # Aumentamos el valor de la clave hasta que sepamos que el 'e' es corpimo con el totiente de 'n'
     e = 2
-    
-    # Busca un valor de e tal que sea coprimo con phi(n), es decir, gcd(e, phi) == 1
-    # Se incrementa e hasta encontrar un valor válido o hasta que e sea mayor o igual a phi(n)
-    while e < phi and math.gcd(e, phi) != 1:
-        e += 1
+    numbListo = False
+    while(not numbListo):
+        if(mcd(e, phi) == 1):
+            numbListo = True
+        else:
+            e = e + 1
     
     # Si no se encontró un valor válido de e, se muestra un mensaje de error y la función retorna None
     if e >= phi:
@@ -195,10 +222,7 @@ def encriptar(caracter, llave_publica):
             raise ValueError("El carácter que has seleccionado es mayor al valor del módulo.")
         
         ##Se usa la fórmula C=M^e, e es el exponente público
-        C = caracter**llave_publica[0]
-        
-        ##Se saca la función módulo de C mod n 
-        mensaje_cifrado = C % llave_publica[1]
+        mensaje_cifrado = pow(caracter, llave_publica[0], llave_publica[1])
         return mensaje_cifrado  
     
     except ValueError as e:
@@ -215,10 +239,7 @@ def desencriptar(caracter_encriptado, llave_privada):
         if caracter_encriptado >= llave_privada[1]:
             raise ValueError("El carácter que has seleccionado es mayor al valor del módulo.")
         ##Se usa la fórmula M=C^d, d es la clave privada
-        M = caracter_encriptado**llave_privada[0]
-        
-        ##Se saca la función módulo de M mod n
-        mensaje_cifrado = M % llave_privada[1]
+        mensaje_cifrado = pow(caracter_encriptado, llave_privada[0], llave_privada[1])
         return mensaje_cifrado  
     except ValueError as e:
         print(e)
@@ -297,7 +318,10 @@ def main():
         return
 
     print("\nGenerando claves RSA...")
-    clave_publica, clave_privada = generar_llaves(rango_inferior, rango_superior)
+    try:
+        clave_publica, clave_privada = generar_llaves(rango_inferior, rango_superior)
+    except ValueError:
+        print("Se obtuvo en error al generar las claves, por favor, pruebe otro rango de números.")
     
     # Comprobación de generación de claves
     if clave_publica is None or clave_privada is None:
@@ -307,17 +331,14 @@ def main():
     
     # Solicitar mensajes para encriptar
     mensajes = []
-    while True:
-        try:
-            mensaje = int(input("\nIngrese un número entero positivo para encriptar (o -1 para finalizar): "))
-            if mensaje == -1:
-                break
-            if mensaje > 0:
-                mensajes.append(mensaje)
-            else:
-                print("El número debe ser positivo.")
-        except ValueError:
-            print("Error: Debe ingresar un número entero.")
+    try:
+        mensaje = int(input("\nIngrese un número entero positivo para encriptar: "))
+        if mensaje > 0:
+            mensajes.append(mensaje)
+        else:
+            print("El número debe ser positivo.")
+    except ValueError:
+        print("Error: Debe ingresar un número entero.")
     
     # Encriptación y desencriptación de cada mensaje
     for i, mensaje in enumerate(mensajes):
@@ -345,4 +366,5 @@ def main():
         else:
             print("La desencriptación no coincide con el mensaje original.")
 
+pruebas()
 main()
