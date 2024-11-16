@@ -11,83 +11,104 @@ import math
 import random
 
 #-----------------------------------------Listado de Funciones--------------------------------------------
-
-#Función para generar números primos en un rango dado utilizando la Criba y el método de división de prueba
+#------------------------------------------------------------------------------------------------
+"""
+Función para generar números primos en un rango dado utilizando el test de primalidad de la criba
+se obtiene el número, se le saca la raíz, y vemos todos los números primos que le antecedan
+tras hacer esto, vemos si dividen al número original, de ser así, es un número compuesto, pero si no pasa
+es un número primo y se agrega a la lista para luego pasarle un random.
+"""
 def generar_primo(rango_inferior, rango_superior):
     
-    lista_Primos = []  # Se inicializa la lista para almacenar los números primos encontrados
+    lista_Primos = []  # Lista para almacenar los primos
     
     # Aseguramos que el rango inferior sea al menos 2, ya que 1 no es primo
+    # Si el usuario llega a poner 1 como su límite inferior de una vez le seteamos a 
     if rango_inferior < 2:
         rango_inferior = 2
+        
+    limite = int(math.sqrt(rango_superior)) + 1
+    primos_menores = criba_eratostenes(limite)
 
     # Iteramos sobre cada número en el rango definido por el usuario
     for n in range(rango_inferior, rango_superior):
-        
-        # Calculamos el límite superior de divisores necesarios (la raíz cuadrada de n)
-        limite = int(math.sqrt(n))
-        
-        # Obtenemos todos los números primos menores o iguales a la raíz cuadrada de n
-        primos_menores = criba_eratostenes(limite)
-        
-        es_primo = True  # Variable para marcar si el número es primo (True) o no primo (False)
+        es_primo = True   # Variable de control marcar si el número es primo (True) o no primo (False)
 
         # Itera solo sobre los primos hasta la raíz cuadrada de n
         for primo in primos_menores:
-            if n % primo == 0:  # Si n es divisible por algún primo, entonces no es primo
-                es_primo = False  # Marca que el número no es primo
-                break  
-
+            if primo > math.sqrt(n):
+                break
+            if n % primo == 0:  # Si n es divisible por algún primo, no es primo
+                es_primo = False
+                break
+            
         # Si después del bucle `for` es_primo sigue en True, significa que n es primo
         if es_primo:
             lista_Primos.append(n)  
-            print(f"Primo: {n}")  
     
     # Manejo del caso en que no se encuentran números primos en el rango
     if not lista_Primos:
-        print("No se encontraron números primos en el rango especificado, porfavor amplie el rango de busqueda.")
+        print("No se encontraron números primos en el rango especificado, por favor amplie el rango de búsqueda.")
         return None  
     
     numb_primo = random.choice(lista_Primos)
-    
     return numb_primo  
+#------------------------------------------------------------------------------------------------
 
-# Función para encontrar el máximo común divisor entre dos números 'a' y 'b' utilizando el algoritmo euclidiano
+#------------------------------------------------------------------------------------------------
+"""
+Función para encontrar el MCD entre dos números utilizando el algoritmo de Euclides
+"""
 def mcd(a, b):
     try:
         #Verificación de que es un número entero positivo
         if not isinstance(a, int) or not isinstance(b, int):
             raise ValueError("Lamentablemente se envío en los parámetros algo que no era un entero.")
-        #El bucle continúa hasta que el residuo entre a y b sea 0
-        #Esto ya implicaría que hemos sacado el mcd, el cual sería el residuo de la iteración anterior
         
-        #Preguntar a Mario si así se maneja
+        #Si alguno de los dos números llegase a ser 0 manejamos el caso devolviendo el
+        #número que sea distinto de 0
         if(a == 0 or b == 0):
             return a if a != 0 else b
         
+        #El bucle continúa hasta que el residuo entre a y b sea 0
+        #Esto ya implicaría que hemos sacado el mcd, el cual sería el residuo de la iteración anterior
         while a % b != 0:
             # Se calcula el residuo de a dividido por b.
             r = a % b
+            """
+            Actualizamos los valores de las variables
+            el que era b pasa a ser a
+            el que salió como residuo ahora es b.
+            
+            Repetimos el proceso hasta que el residuo sea 0,
+            nuestro punto de identificación que ya tenemos el MCD.
+            """
             a = b
             b = r
-            
+       
         # Devolvemos 'b', que sería el MCD
         return b
-    
     except ValueError as e:
         print(e)
         return None
-    
-# Función para encontrar el inverso modular entre el exponente público y n
-# En el inverso modular encontramos un número que al multiplicarlo por 'e', sea congruente a 1 mod n
+#------------------------------------------------------------------------------------------------
 
+#------------------------------------------------------------------------------------------------
+"""
+Función para encontrar el inverso modular entre el exponente público y n
+donde se espera que este n sea el totiente del resultado entre p y q.
+
+En el sistema RSA, utilizamos esto para encontrar la clave privada
+para lograrlo se deve calcular el inverso de la 'e' con el módulo del 
+totiente de n.
+"""
 def inverso_modular(e, n):
     # Verificar que ambos sean enteros positivos
     if not isinstance(e, int) or not isinstance(n, int):
         raise ValueError("Error: Ambos parámetros deben ser enteros.")
     if e <= 0 or n <= 0:
         raise ValueError("Error: Ambos parámetros deben ser enteros positivos.")
-
+    
     # Inicialización de residuos y coeficientes
     a = n
     b = e
@@ -133,9 +154,15 @@ def inverso_modular(e, n):
     inverso = x_anterior % n
 
     return inverso
+#------------------------------------------------------------------------------------------------
 
-    
-# Función para generar una lista de números primos usando la Criba de Eratóstenes
+#------------------------------------------------------------------------------------------------    
+"""
+Esta función no está entre la lsita de las funciones solicitadas pero la hemos implementado 
+para poder hacer un test de primalidad a la hora de generar un número primo de manera aleatoria, 
+más que todo para garantizar que la lista de números generada sea de primos para después parasarle el 
+random.
+"""
 def criba_eratostenes(limite):
     # Se crea una lista donde cada índice representa un número; el valor True indica que es primo
     es_primo = [True] * (limite + 1)
@@ -149,14 +176,20 @@ def criba_eratostenes(limite):
 
     # Devuelve una lista de números primos hasta el límite especificado
     return [p for p, primo in enumerate(es_primo) if primo]
+#------------------------------------------------------------------------------------------------    
 
-
-# Función para generar las llave pública y privada para el algoritmo RSA 
+#------------------------------------------------------------------------------------------------    
+"""
+En esta función es donde ya logramos manejar el flujo completo de lo que se hace en el sistema RSA
+La selección de los 2 números primos para generar el 'n', la selección del exponente público 'e',
+y el cálculo de la llave privada haciendo uso del inverso modular.
+"""
 def generar_llaves(rango_inferior, rango_superior):
     # Genera la lista de números primos en el rango especificado
     primo1 = generar_primo(rango_inferior, rango_superior)
+
     primo2 = primo1
-    while primo2 != primo1:
+    while primo2 == primo1:
         primo2 = generar_primo(rango_inferior, rango_superior)
 
     p = primo1
@@ -209,162 +242,129 @@ def generar_llaves(rango_inferior, rango_superior):
 
     # Retorna las claves pública y privada como una tupla
     return clave_publica, clave_privada
+#------------------------------------------------------------------------------------------------    
 
-# Función para encriptar un mensaje dado el caracter a encriptar, y la llave pública
+#------------------------------------------------------------------------------------------------    
+"""
+Función para encriptar un carácter utilizando la llave pública,
+se recibe el carácter y se convierte a un número utilizando ASCII, 
+pero el número asignado al carácter debe ser un número que esté entre 0 y n-1,
+ya con este número, se eleva al valor del exponente público 'e' y se le saca el 
+módulo n.
+"""
 def encriptar(caracter, llave_publica):
-    ##Validaciones para el carácter
-    try:
-        ##Veficar que el carácter sea un número entero positivo
-        if not isinstance(caracter, int) or caracter <= 0:
-            raise ValueError("Lamentablemente el carácter que has ingresado no es un entero positivo.")
-        ##Verificar que el carácter sea menor que n
-        if caracter >= llave_publica[1]:
-            raise ValueError("El carácter que has seleccionado es mayor al valor del módulo.")
-        
-        ##Se usa la fórmula C=M^e, e es el exponente público
-        mensaje_cifrado = pow(caracter, llave_publica[0], llave_publica[1])
-        return mensaje_cifrado  
+    numb_ASCII = ord(caracter)
+    if(numb_ASCII > llave_publica[1]):
+        print("Lamentablemente el 'n' generado es más pequeño que el valor en ASCII de uno de tus carácteres.")
+        return None
     
-    except ValueError as e:
-        ##Impresión de cualquier error que se pueda llegar a levantar
-        print(e)
-        return None    
-    
+    #Aplicamos la fórmula C=M^e mod n
+    mensaje_cifrado = pow(numb_ASCII, llave_publica[0], llave_publica[1])
+    return mensaje_cifrado 
+#------------------------------------------------------------------------------------------------    
+
+#------------------------------------------------------------------------------------------------    
+"""
+Función para desencriptar una carácter,
+se recibe el carácter que fue cifrado anteriormente, y se eleva al valor de la 
+llave privada 'd', para posteriormente aplicarle el mod 'n', y se esperaría
+que el resultado de esta operación sea el número correspondiente al carácter
+original.
+"""
 # Función para desencriptar un caracter que se haya encriptado con ayuda de una llave privada
 def desencriptar(caracter_encriptado, llave_privada):
-    try:
-        #Verificación de que es un número entero positivo
-        if not isinstance(caracter_encriptado, int) and caracter_encriptado <= 0:
-            raise ValueError("Lamentablemente el carácter que has ingresado no es un entero positivo.")
-        if caracter_encriptado >= llave_privada[1]:
-            raise ValueError("El carácter que has seleccionado es mayor al valor del módulo.")
-        ##Se usa la fórmula M=C^d, d es la clave privada
-        mensaje_cifrado = pow(caracter_encriptado, llave_privada[0], llave_privada[1])
-        return mensaje_cifrado  
-    except ValueError as e:
-        print(e)
-        return None
+    mensaje_descifrado = pow(caracter_encriptado, llave_privada[0], llave_privada[1])
+    return mensaje_descifrado
 #---------------------------------------------------------------------------------------------------------
 
+#---------------------------------Función para manejar las cadenas de texto-------------------
+"""
+Tras hacer el proceso de cifrado y descifrado del mensaje, se esperaría que los números que ve el usuario
+puedan ser transformados a texto, simulando un caso real de uso del RSA
+"""
+def ascii_to_text(ascii_list):
+    return ''.join(chr(num) for num in ascii_list)
+#---------------------------------------------------------------------------------------------------------
 
-#--------------------------Pruebas-------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------------------
+#--------------------------Main------------------------
+"""
+En esta función llevaremos a cabo todo el proceso para el sistema RSA.
+Solicitaremos los límites para buscar primos, luego le daremos el menú de opciones 
+al usuario, donde podrá salir del programa, o meter una cadena de texto.
 
-def pruebas():
-    """
-    Función para realizar pruebas específicas del sistema RSA con valores predefinidos.
-    """
-    # Definición de la clave pública y privada, y los mensajes de prueba
-    clave_publica = (15131, 31877)
-    clave_privada = (31271, 31877)
-    
-    mensajes_prueba = [
-        {"original": 42, "encriptado_esperado": 3422},
-        {"original": 15, "encriptado_esperado": 17062},
-        {"original": 67, "encriptado_esperado": 25058}
-    ]
-    
-    print("Pruebas del Sistema de Encriptación RSA\n")
-    print(f"Clave Pública: {clave_publica}")
-    print(f"Clave Privada: {clave_privada}\n")
-
-    # Realización de pruebas para cada mensaje
-    for i, prueba in enumerate(mensajes_prueba):
-        mensaje_original = prueba["original"]
-        mensaje_encriptado_esperado = prueba["encriptado_esperado"]
-        
-        print(f"\nPrueba {i + 1}")
-        print(f"Mensaje original: {mensaje_original}")
-
-        # Encriptación del mensaje original
-        mensaje_encriptado = encriptar(mensaje_original, clave_publica)
-        print(f"Mensaje encriptado: {mensaje_encriptado}")
-        
-        # Comparación con el mensaje encriptado esperado
-        if mensaje_encriptado == mensaje_encriptado_esperado:
-            print("La encriptación coincide con el valor esperado.")
-        else:
-            print("La encriptación no coincide con el valor esperado.")
-
-        # Desencriptación del mensaje encriptado
-        mensaje_desencriptado = desencriptar(mensaje_encriptado, clave_privada)
-        print(f"Mensaje desencriptado: {mensaje_desencriptado}")
-        
-        # Verificación de que el mensaje desencriptado coincide con el original
-        if mensaje_desencriptado == mensaje_original:
-            print("La desencriptación fue exitosa y coincide con el mensaje original.")
-        else:
-            print("La desencriptación no coincide con el mensaje original.")
-
-# Ejecución de las pruebas
-
-#--------------------------Main-------------------------------------------------------------------------------
-
+En caso de irse por la primera opción, usando los límites definidos se llevará
+todo el proceso necesario para encriptar cada uno de los carácteres en la cadena de texto
+para luego descifrarlos y así demostrar la válidez del programa, al finalizar
+regresa al menú principal.
+"""
 def main():
-    """
-    Función principal que ejecuta el flujo completo del sistema RSA con entrada desde la terminal:
-    1. Solicita al usuario el rango para generar números primos.
-    2. Genera claves públicas y privadas.
-    3. Solicita al usuario ingresar mensajes a encriptar y desencriptar.
-    """
-    
-    print("Sistema de Encriptación RSA")
-    
-    # Solicitar rango para generación de números primos
-    try:
-        rango_inferior = int(input("Ingrese el rango inferior para generar números primos: "))
-        rango_superior = int(input("Ingrese el rango superior para generar números primos: "))
-    except ValueError:
-        print("Error: Debe ingresar un número entero válido para el rango.")
-        return
+    # Solicitar al usuario los límites para generar los números primos
+    while True:
+        try:
+            rango_inferior = int(input("Ingrese el límite inferior para la generación de números primos: "))
+            rango_superior = int(input("Ingrese el límite superior para la generación de números primos: "))
+            if rango_inferior >= rango_superior:
+                print("El límite inferior debe ser menor que el límite superior. Por favor, intente nuevamente.")
+            else:
+                break
+        except ValueError:
+            print("Por favor, ingrese valores enteros válidos.")
 
-    print("\nGenerando claves RSA...")
-    try:
-        clave_publica, clave_privada = generar_llaves(rango_inferior, rango_superior)
-    except ValueError:
-        print("Se obtuvo en error al generar las claves, por favor, pruebe otro rango de números.")
-    
-    # Comprobación de generación de claves
-    if clave_publica is None or clave_privada is None:
-        print("Error al generar claves RSA. Saliendo del programa.")
+    # Generar las claves RSA
+    claves_generadas = generar_llaves(rango_inferior, rango_superior)
+    if claves_generadas is None:
+        print("Error al generar las claves. El programa terminará.")
         return
-    
-    
-    # Solicitar mensajes para encriptar
-    mensajes = []
-    try:
-        mensaje = int(input("\nIngrese un número entero positivo para encriptar: "))
-        if mensaje > 0:
-            mensajes.append(mensaje)
-        else:
-            print("El número debe ser positivo.")
-    except ValueError:
-        print("Error: Debe ingresar un número entero.")
-    
-    # Encriptación y desencriptación de cada mensaje
-    for i, mensaje in enumerate(mensajes):
-        print(f"\nPrueba {i+1} - Mensaje original: {mensaje}")
-        
-        # Encriptación
-        mensaje_encriptado = encriptar(mensaje, clave_publica)
-        if mensaje_encriptado is None:
-            print("Error al encriptar el mensaje.")
-            continue
-        
-        print(f"Mensaje encriptado: {mensaje_encriptado}")
-        
-        # Desencriptación
-        mensaje_desencriptado = desencriptar(mensaje_encriptado, clave_privada)
-        if mensaje_desencriptado is None:
-            print("Error al desencriptar el mensaje.")
-            continue
-        
-        print(f"Mensaje desencriptado: {mensaje_desencriptado}")
-        
-        # Verificación
-        if mensaje == mensaje_desencriptado:
-            print("La desencriptación fue exitosa y coincide con el mensaje original.")
-        else:
-            print("La desencriptación no coincide con el mensaje original.")
+    else:
+        clave_publica, clave_privada = claves_generadas
 
-pruebas()
+    while True:
+        print("\n----------------------------Menú-------------------------------")
+        print("1. Ingresar cadena de texto")
+        print("2. Salir")
+        opcion = input("Seleccione una opción: ")
+
+        if opcion == '1':
+            texto = input("Por favor, ingresar una cadena de texto: \n")
+            
+            texto_cifrado = []
+            texto_descifrado = []
+            
+            for caracter in texto:
+                print(f"\nProcesando carácter: '{caracter}'")
+                
+                # Encriptar el carácter
+                cifrado = encriptar(caracter, clave_publica)
+                if cifrado is None:
+                    print("Error en la encriptación. El programa terminará.")
+                    return
+                
+                print(f"Carácter en ASCII: {ord(caracter)}")
+                print(f"Carácter encriptado: {cifrado}")
+                
+                texto_cifrado.append(cifrado)
+                
+                # Desencriptar el carácter
+                descifrado_num = desencriptar(cifrado, clave_privada)
+                caracter_descifrado = chr(descifrado_num)
+                
+                print(f"Carácter desencriptado (ASCII): {descifrado_num}")
+                print(f"Carácter original recuperado: '{caracter_descifrado}'")
+                
+                texto_descifrado.append(caracter_descifrado)
+            # Mostrar los resultados
+            print("\nTexto cifrado:")
+            print(' '.join(map(str, texto_cifrado)))
+            print("Texto descifrado:")
+            print(''.join(texto_descifrado))
+            
+        elif opcion == '2':
+            print("Saliendo del programa.")
+            break
+        
+        else:
+            print("Opción inválida. Por favor, seleccione una opción válida.")
+#---------------------------------------------------------------------------------------------------------
+
 main()
