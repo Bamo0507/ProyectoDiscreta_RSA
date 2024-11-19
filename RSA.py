@@ -302,14 +302,18 @@ def main():
     # Solicitar al usuario los límites para generar los números primos
     while True:
         try:
-            rango_inferior = int(input("Ingrese el límite inferior para la generación de números primos: "))
-            rango_superior = int(input("Ingrese el límite superior para la generación de números primos: "))
-            if rango_inferior >= rango_superior:
+            rango_inferior = int(input("Ingrese el límite inferior para la generación de números primos (debe ser mayor a 1): "))
+            rango_superior = int(input("Ingrese el límite superior para la generación de números primos (debe ser mayor a 1): "))
+            if rango_inferior <= 1 or rango_superior <= 1:
+                print("Ambos límites deben ser mayores a 1. Por favor, intente nuevamente.")
+            elif rango_inferior >= rango_superior:
                 print("El límite inferior debe ser menor que el límite superior. Por favor, intente nuevamente.")
             else:
                 break
         except ValueError:
             print("Por favor, ingrese valores enteros válidos.")
+
+
 
     # Generar las claves RSA
     claves_generadas = generar_llaves(rango_inferior, rango_superior)
@@ -340,7 +344,6 @@ def main():
                     print("Error en la encriptación. El programa terminará.")
                     return
                 
-                print(f"Carácter en ASCII: {ord(caracter)}")
                 print(f"Carácter encriptado: {cifrado}")
                 
                 texto_cifrado.append(cifrado)
@@ -349,8 +352,7 @@ def main():
                 descifrado_num = desencriptar(cifrado, clave_privada)
                 caracter_descifrado = chr(descifrado_num)
                 
-                print(f"Carácter desencriptado (ASCII): {descifrado_num}")
-                print(f"Carácter original recuperado: '{caracter_descifrado}'")
+                print(f"Carácter desencriptado: '{caracter_descifrado}'")
                 
                 texto_descifrado.append(caracter_descifrado)
             # Mostrar los resultados
