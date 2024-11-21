@@ -27,11 +27,11 @@ def generar_primo(rango_inferior, rango_superior):
     if rango_inferior < 2:
         rango_inferior = 2
         
-    limite = int(math.sqrt(rango_superior)) + 1
+    limite = int(math.sqrt(rango_superior)) 
     primos_menores = criba_eratostenes(limite)
 
     # Iteramos sobre cada número en el rango definido por el usuario
-    for n in range(rango_inferior, rango_superior):
+    for n in range(rango_inferior, rango_superior + 1):
         es_primo = True   # Variable de control marcar si el número es primo (True) o no primo (False)
 
         # Itera solo sobre los primos hasta la raíz cuadrada de n
@@ -277,16 +277,6 @@ def desencriptar(caracter_encriptado, llave_privada):
     return mensaje_descifrado
 #---------------------------------------------------------------------------------------------------------
 
-#---------------------------------Función para manejar las cadenas de texto-------------------
-"""
-Tras hacer el proceso de cifrado y descifrado del mensaje, se esperaría que los números que ve el usuario
-puedan ser transformados a texto, simulando un caso real de uso del RSA
-"""
-def ascii_to_text(ascii_list):
-    return ''.join(chr(num) for num in ascii_list)
-#---------------------------------------------------------------------------------------------------------
-
-#---------------------------------------------------------------------------------------------------------
 #--------------------------Main------------------------
 """
 En esta función llevaremos a cabo todo el proceso para el sistema RSA.
